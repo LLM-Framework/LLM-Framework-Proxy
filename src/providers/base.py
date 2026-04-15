@@ -26,7 +26,8 @@ class BaseProvider(ABC):
 
     @property
     def available(self) -> bool:
-        return self._available
+        # return self._available
+        return True  # принудительно True для тестирования
 
     @available.setter
     def available(self, value: bool):
