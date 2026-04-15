@@ -53,8 +53,71 @@ curl -X POST http://localhost:8002/api/v1/generate/yandex \
 
 ---
 
-## Взаимодействие сервисов
+## Поток данных
 
+```mermaid
+sequenceDiagram
+    participant Client
+    participant LLMProxy as LLM Proxy Service
+    participant Router as Generate Router
+    participant Provider as YandexProvider
+    participant YandexAPI as YandexGPT API
+    
+    Client->>LLMProxy: POST /generate/yandex
+    Note over Client,LLMProxy: {prompt: "Скажи привет"}
+    
+    LLMProxy->>Router: Валидация запроса
+    Router->>Router: Проверка provider_name
+    
+    Router->>Provider: generate(prompt, temperature)
+    Note over Router,Provider: Вызов через BaseProvider
+    
+    Provider->>Provider: Формирование headers + body
+    Provider->>YandexAPI: POST /completion
+    Note over Provider,YandexAPI: Authorization: Api-Key xxx
+    
+    YandexAPI-->>Provider: {result: {...}}
+    Provider->>Provider: Извлечение текста, измерение latency
+    
+    Provider-->>Router: (response_text, latency_ms, tokens)
+    Router-->>LLMProxy: GenerateResponse
+    LLMProxy-->>Client: JSON ответ
+
+```
+
+## Зависимости и технологии
+
+```mermaid
+graph LR
+    subgraph Core["Основные"]
+        FastAPI[FastAPI]
+        Uvicorn[Uvicorn]
+        Pydantic[Pydantic v2]
+    end
+    
+    subgraph HTTP["HTTP клиенты"]
+        HTTPX[HTTPX]
+    end
+    
+    subgraph Utils["Утилиты"]
+        Tenacity[Tenacity - retry]
+        PythonDotEnv[python-dotenv]
+    end
+    
+    subgraph Monitoring["Мониторинг"]
+        Prometheus[Prometheus Client]
+    end
+    
+    FastAPI --> Pydantic
+    FastAPI --> Uvicorn
+    Providers --> HTTPX
+    Providers --> Tenacity
+    Config --> PythonDotEnv
+    API --> Prometheus
+
+```
+
+## Взаимодействие сервисов
  
 ```mermaid
 graph LR
