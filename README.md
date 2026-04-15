@@ -55,7 +55,7 @@ curl -X POST http://localhost:8002/api/v1/generate/yandex \
 
 ## Взаимодействие сервисов
 
-```markdown
+ 
 ```mermaid
 graph LR
     Translator[Translator Service<br/>:8001] -->|переведённый промпт| Proxy
@@ -67,7 +67,7 @@ graph LR
     style Proxy fill:#fff3e0,stroke:#e65100
     style Evaluator fill:#e8f5e9,stroke:#1b5e20
     style Frontend fill:#f3e5f5,stroke:#4a148c
-
+```
 
 ## Лицензия
 
